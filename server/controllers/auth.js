@@ -68,7 +68,32 @@ function login(req, res) {
     });
 }
 
+async function refreshAccessToken(req, res) {
+const { token } = req.body;
+
+if (!token) return res.status(400).send({ msg: "El token es obligatorio" });
+
+try {
+const { user_id } = jwt.verifyToken(token);
+
+const userStorage = await User.findOne({ _id: user_id });
+
+if (!userStorage) {
+
+return res.status(404).send({ msg: "Usuario no encontrado" });
+}
+
+res.status(200).send({
+accessToken: jwt.createAccessToken(userStorage)
+});
+
+} catch (error) {
+res.status(401).send({ msg: "Token inválido o expirado", error: error.message });
+}
+}
+
 module.exports = {
     register,
     login,
+    refreshAccessToken,
 };
