@@ -44,18 +44,24 @@ function login(req, res) {
     User.findOne({ email: emailLowerCase }, (error, userStorage) => {
         if (error) {
             res.status(500).send({ msg: "Error del servidor" });
-            } else {
-                // console.log("Password: ", password);
-                // console.log(userStorage);
+        } else {
             bcrypt.compare(password, userStorage.password, (error, check) => {
                 if (error) {
                     res.status(500).send({ msg: "Error del servidor" });
                 } else if (!check) {
                     res.status(400).send({ msg: "Contraseña incorrecta" });
                 } else if (!userStorage.active) {
-                res.status(401).send({ msg: "Usuario no autorizado o no activo" });
+                    res.status(401).send({ msg: "Usuario no autorizado o no activo" });
                 } else {
-                    res.status(200).send({ msg: "Login correcto", user: userStorage });
+                    const access = jwt.createAccessToken(userStorage);
+                    const refresh = jwt.createRefreshToken(userStorage);
+
+                    res.status(200).send({
+                        msg: "Login correcto",
+                        user: userStorage,
+                        access,
+                        refresh
+                    });
                 }
             });
         }
