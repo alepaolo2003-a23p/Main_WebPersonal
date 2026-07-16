@@ -1,6 +1,6 @@
+const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors");
 const {API_VERSION} = require("./constants");
 
 const app = express();
@@ -10,14 +10,14 @@ const UserRoutes = require("./router/user");
 const MenuRoutes = require("./router/menu");
 const CourseRoutes = require("./router/course");
 
+app.use(cors({
+    origin: "http://localhost:3000"
+}));
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
 
 app.use(express.static("uploads"));
 
-app.use(cors({
-    origin: "http://localhost:3000"
-}));
 
 console.log("AuthRoutes", AuthRoutes);
 console.log("Tipo:", typeof AuthRoutes);

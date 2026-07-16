@@ -1,20 +1,20 @@
 const Course = require("../models/course");
 
 async function createCourse(req, res) {
-try {
-const courseData = req.body;
+  try {
+    const courseData = req.body;
 
-if (req.file) {
+    if (req.file) {
+      courseData.miniature = req.file.filename;
+    }
 
-courseData.miniature = req.file.filename;
-}
-
-const course = new Course(courseData);
-const courseSaved = await course.save();
-res.status(200).send(courseSaved);
-} catch (error) {
-res.status(400).send({ msg: "Error al crear el curso" });
-}
+    const course = new Course(courseData);
+    const courseSaved = await course.save();
+    res.status(200).send(courseSaved);
+  } catch (error) {
+    console.error("❌ Error al crear el curso:", error);
+    res.status(400).send({ msg: "Error al crear el curso", detail: error.message });
+  }
 }
 
 async function getCourses(req, res) {
