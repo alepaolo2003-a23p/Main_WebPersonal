@@ -9,5 +9,6 @@ api.get("/user/me", ensureAuth, UserController.getMe);
 api.get("/users", ensureAuth, UserController.getUsers);
 api.post("/user", ensureAuth, upload.single("avatar"), UserController.createUser);
 api.put("/user/:id", ensureAuth, upload.single("avatar"), UserController.updateUser);
+api.delete("/user/:id", ensureAuth, UserController.deleteUser);
 
 module.exports = api;

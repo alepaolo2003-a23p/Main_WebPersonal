@@ -7,6 +7,8 @@ const app = express();
 
 const AuthRoutes = require("./router/auth");
 const UserRoutes = require("./router/user");
+const MenuRoutes = require("./router/menu");
+const CourseRoutes = require("./router/course");
 
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
@@ -22,5 +24,7 @@ console.log("Tipo:", typeof AuthRoutes);
 
 app.use(`/api/${API_VERSION}`, AuthRoutes);
 app.use(`/api/${API_VERSION}`, UserRoutes);
+app.use(`/api/${API_VERSION}`, MenuRoutes);
+app.use(`/api/${API_VERSION}`, CourseRoutes);
 
 module.exports = app;

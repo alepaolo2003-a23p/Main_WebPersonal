@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+const image = require("../utils/image");
 
 async function getMe(req, res) {
     try {
@@ -46,6 +47,7 @@ async function createUser(req, res) {
 
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(password, salt);
+        const avatarName = file ? image.getFileName(file) : null;
 
         const newUser = new User({
             firstname,
@@ -54,7 +56,7 @@ async function createUser(req, res) {
             password: hashedPassword,
             role: role || "user",
             active: active === "true" || active === true,
-            avatar: file ? file.filename : null
+            avatar: avatarName,
         });
 
         const userSaved = await newUser.save();
@@ -70,35 +72,49 @@ async function createUser(req, res) {
 }
 
 async function updateUser(req, res) {
+    try {
+        const { id } = req.params;
+        const userData = { ...req.body };
+
+        if (userData.password) {
+            const salt = bcrypt.genSaltSync(10);
+            userData.password = bcrypt.hashSync(userData.password, salt);
+        }
+
+        const file = req.file;
+        if (file) {
+            userData.avatar = file.filename;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
+
+        if (!updatedUser) {
+            return res.status(400).send({ msg: "No se ha encontrado usuario" });
+        }
+
+        res.status(200).send({ msg: "Actualización correcta", user: updatedUser });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ msg: "Error al actualizar el usuario" });
+    }
+}
+
+async function deleteUser(req, res) {
 try {
 const { id } = req.params;
-const userData = { ...req.body };
 
-// Si se está actualizando la contraseña, hashearla
-if (userData.password) {
-const salt = bcrypt.genSaltSync(10);
-userData.password = bcrypt.hashSync(userData.password, salt);
-}
+const deletedUser = await User.findByIdAndDelete(id);
 
-// Si se subió un nuevo avatar
-const file = req.file;
-if (file) {
-userData.avatar = image.getFileName(file);
-}
-
-const updatedUser = await User.findByIdAndUpdate(id, userData, { new:
-true });
-
-if (!updatedUser) {
+if (!deletedUser) {
 return res.status(400).send({ msg: "No se ha encontrado usuario" });
-
 }
 
-res.status(200).send({ msg: "Actualización correcta", user: updatedUser });
+res.status(200).send({ msg: "Usuario eliminado correctamente", user:
+deletedUser });
 
 } catch (error) {
 console.error(error);
-res.status(500).send({ msg: "Error al actualizar el usuario" });
+res.status(500).send({ msg: "Error al eliminar el usuario" });
 }
 }
 
@@ -107,4 +123,5 @@ module.exports = {
     getUsers,
     createUser,
     updateUser,
+    deleteUser,
 };
