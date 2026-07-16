@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
 async function getMe(req, res) {
@@ -5,24 +6,29 @@ async function getMe(req, res) {
         const user_id = req.user_id;
         const response = await User.findById(user_id);
 
-        if(!response){
-            return res.status(400).send({ msg: "Usuario no encontrado" });
+        if (!response) {
+            return res.status(400).send({ msg: "No se ha encontrado usuario" });
         }
-        res.status(200).send({response});
+
+        res.status(200).send({ response });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ msg: "Error al obtener al usuario" });
+        res.status(500).send({ msg: "Error al obtener el usuario" });
     }
 }
 
 async function getUsers(req, res) {
     try {
-        const response = await User.find();
+        const { active } = req.query;
+        let response = null;
 
-        if(!response){
-            return res.status(400).send({ msg: "Usuarios no encontrados" });
+        if (active === undefined) {
+            response = await User.find();
+        } else {
+            response = await User.find({ active: active === "true" });
         }
-        res.status(200).send({response});
+
+        res.status(200).send({ response });
     } catch (error) {
         console.error(error);
         res.status(500).send({ msg: "Error al obtener los usuarios" });
@@ -31,16 +37,74 @@ async function getUsers(req, res) {
 
 async function createUser(req, res) {
     try {
-        const response = await User.create(req.body);
-        res.status(200).send({ msg: "Usuario creado exitosamente", response });
+        const { firstname, lastname, email, password, role, active } = req.body;
+        const file = req.file;
+
+        if (!firstname || !lastname || !email || !password) {
+            return res.status(400).send({ msg: "Faltan campos obligatorios" });
+        }
+
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(password, salt);
+
+        const newUser = new User({
+            firstname,
+            lastname,
+            email,
+            password: hashedPassword,
+            role: role || "user",
+            active: active === "true" || active === true,
+            avatar: file ? file.filename : null
+        });
+
+        const userSaved = await newUser.save();
+
+        res.status(201).send({
+            msg: "Usuario creado correctamente",
+            user: userSaved
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send({ msg: "Error al crear el usuario" });
     }
 }
 
+async function updateUser(req, res) {
+try {
+const { id } = req.params;
+const userData = { ...req.body };
+
+// Si se está actualizando la contraseña, hashearla
+if (userData.password) {
+const salt = bcrypt.genSaltSync(10);
+userData.password = bcrypt.hashSync(userData.password, salt);
+}
+
+// Si se subió un nuevo avatar
+const file = req.file;
+if (file) {
+userData.avatar = image.getFileName(file);
+}
+
+const updatedUser = await User.findByIdAndUpdate(id, userData, { new:
+true });
+
+if (!updatedUser) {
+return res.status(400).send({ msg: "No se ha encontrado usuario" });
+
+}
+
+res.status(200).send({ msg: "Actualización correcta", user: updatedUser });
+
+} catch (error) {
+console.error(error);
+res.status(500).send({ msg: "Error al actualizar el usuario" });
+}
+}
+
 module.exports = {
     getMe,
     getUsers,
     createUser,
+    updateUser,
 };
