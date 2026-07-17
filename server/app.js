@@ -10,6 +10,7 @@ const UserRoutes = require("./router/user");
 const MenuRoutes = require("./router/menu");
 const CourseRoutes = require("./router/course");
 const PostRoutes = require("./router/post");
+const NewsletterRoutes = require("./router/newsletter");
 
 app.use(cors({
     origin: "http://localhost:3000"
@@ -28,5 +29,6 @@ app.use(`/api/${API_VERSION}`, UserRoutes);
 app.use(`/api/${API_VERSION}`, MenuRoutes);
 app.use(`/api/${API_VERSION}`, CourseRoutes);
 app.use(`/api/${API_VERSION}`, PostRoutes);
+app.use(`/api/${API_VERSION}`, NewsletterRoutes);
 
 module.exports = app;
