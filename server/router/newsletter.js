@@ -1,6 +1,6 @@
 const express = require('express');
 const NewsletterController = require('../controllers/newsletter');
-const {ensureAuth} = require('../middlewares/authenticated');
+const ensureAuth = require('../middlewares/authenticated');
 
 const api = express.Router();
 

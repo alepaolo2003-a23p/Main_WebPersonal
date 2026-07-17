@@ -55,18 +55,31 @@ error: error.message,
 // Listar todos los suscriptores activos
 const getSubscribers = async (req, res) => {
 try {
-const subscribers = await Newsletter.find({ active: true }).sort({ subscribed_at: -1 });
+const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 10;
 
-return res.status(200).json({
-total: subscribers.length,
-subscribers,
+const options = {
+page,
+limit,
+sort: { subscribed_at: -1 },
+};
+
+const result = await Newsletter.paginate({ active: true }, options);
+
+return res.status(200).send({
+subscribers: result.docs,
+total: result.totalDocs,
+totalPages: result.totalPages,
+currentPage: result.page,
+itemsPerPage: limit,
 });
 } catch (error) {
-return res.status(500).json({
+return res.status(500).send({
 message: "Error al obtener los suscriptores",
 error: error.message,
 });
 }
+
 };
 
 // Dar de baja un correo (sin eliminarlo de la base de datos)
@@ -75,7 +88,7 @@ try {
 const { email } = req.body;
 
 if (!email) {
-return res.status(400).json({ message: "El correo electrónico es obligatorio" });
+return res.status(400).send({ message: "El correo electrónico es obligatorio" });
 }
 
 const normalizedEmail = email.trim().toLowerCase();
@@ -83,17 +96,18 @@ const normalizedEmail = email.trim().toLowerCase();
 const subscriber = await Newsletter.findOne({ email: normalizedEmail });
 
 if (!subscriber) {
-return res.status(404).json({ message: "Correo no encontrado en la lista de suscriptores" });
+return res.status(404).send({ message: "Correo no encontrado en la lista de suscriptores" });
 }
 
 subscriber.active = false;
 await subscriber.save();
 
-return res.status(200).json({ message: "Te has dado de baja correctamente" });
+return res.status(200).send({ message: "Te has dado de baja correctamente" });
 } catch (error) {
-return res.status(500).json({
+return res.status(500).send({
 message: "Error al procesar la baja",
 error: error.message,
+
 });
 }
 };
@@ -106,12 +120,12 @@ const { id } = req.params;
 const deleted = await Newsletter.findByIdAndDelete(id);
 
 if (!deleted) {
-return res.status(404).json({ message: "Suscriptor no encontrado" });
+return res.status(404).send({ message: "Suscriptor no encontrado" });
 }
 
-return res.status(200).json({ message: "Suscriptor eliminado correctamente" });
+return res.status(200).send({ message: "Suscriptor eliminado correctamente" });
 } catch (error) {
-return res.status(500).json({
+return res.status(500).send({
 message: "Error al eliminar el suscriptor",
 error: error.message,
 });
