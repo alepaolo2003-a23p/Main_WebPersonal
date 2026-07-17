@@ -12,6 +12,6 @@ const postSchema = new mongoose.Schema({
     created_at:Date,
 });
 
-PostSchema.plugin(mongoosePaginate);
+postSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Post', postSchema);
