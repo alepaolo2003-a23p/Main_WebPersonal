@@ -9,6 +9,7 @@ const AuthRoutes = require("./router/auth");
 const UserRoutes = require("./router/user");
 const MenuRoutes = require("./router/menu");
 const CourseRoutes = require("./router/course");
+const PostRoutes = require("./router/post");
 
 app.use(cors({
     origin: "http://localhost:3000"
@@ -26,5 +27,6 @@ app.use(`/api/${API_VERSION}`, AuthRoutes);
 app.use(`/api/${API_VERSION}`, UserRoutes);
 app.use(`/api/${API_VERSION}`, MenuRoutes);
 app.use(`/api/${API_VERSION}`, CourseRoutes);
+app.use(`/api/${API_VERSION}`, PostRoutes);
 
 module.exports = app;
