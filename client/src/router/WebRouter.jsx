@@ -1,10 +1,13 @@
 import { Route, Routes } from "react-router-dom";
-import { Home } from "../pages/web";
+import { ClientLayout } from "../layouts";
+import { Home } from "../pages/web/Home";
 
 export function WebRouter() {
     return (
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<ClientLayout />}>
+                <Route path="/" element={<Home />} />   
+            </Route>
         </Routes>
     );
 }
